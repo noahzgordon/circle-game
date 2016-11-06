@@ -2,9 +2,36 @@ module Main exposing (..)
 
 import Svg
 import Svg.Attributes exposing (..)
+import Html.App
 
 
 main =
+    Html.App.beginnerProgram
+        { model = initialModel
+        , update = update
+        , view = view
+        }
+
+
+type alias Model =
+    { player : Circle, enemies : List Circle }
+
+
+initialModel : Model
+initialModel =
+    { player = player, enemies = enemies }
+
+
+type Message
+    = Noop
+
+
+update : Message -> Model -> Model
+update message model =
+    model
+
+
+view model =
     Svg.svg [ width "500", height "500" ] ([ player ] ++ enemies |> List.map drawCircle)
 
 
