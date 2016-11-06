@@ -6,10 +6,11 @@ import Html.App
 
 
 main =
-    Html.App.beginnerProgram
-        { model = initialModel
+    Html.App.program
+        { init = initialModel
         , update = update
         , view = view
+        , subscriptions = subscriptions
         }
 
 
@@ -17,18 +18,23 @@ type alias Model =
     { player : Circle, enemies : List Circle }
 
 
-initialModel : Model
+initialModel : (Model, Cmd Message)
 initialModel =
-    { player = player, enemies = enemies }
+    ({ player = player, enemies = enemies }, Cmd.none)
 
 
 type Message
     = Noop
 
 
-update : Message -> Model -> Model
+update : Message -> Model -> (Model, Cmd Message)
 update message model =
-    model
+    (model, Cmd.none)
+
+
+subscriptions : Model -> Sub Message
+subscriptions model =
+    Sub.none
 
 
 view model =
