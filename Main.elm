@@ -3,6 +3,7 @@ module Main exposing (..)
 import Svg
 import Svg.Attributes exposing (..)
 import Html.App
+import Keyboard
 
 
 main =
@@ -18,27 +19,59 @@ type alias Model =
     { player : Circle, enemies : List Circle }
 
 
-initialModel : (Model, Cmd Message)
+initialModel : ( Model, Cmd Message )
 initialModel =
-    ({ player = player, enemies = enemies }, Cmd.none)
+    ( { player = player, enemies = enemies }, Cmd.none )
 
 
 type Message
-    = Noop
+    = KeyPress Keyboard.KeyCode
 
 
-update : Message -> Model -> (Model, Cmd Message)
+update : Message -> Model -> ( Model, Cmd Message )
 update message model =
-    (model, Cmd.none)
+    case message of
+        KeyPress keyCode ->
+            let
+                player =
+                    model.player
+
+                newPlayer =
+                    { player | position = updatePosition player.position keyCode }
+            in
+                ( { model | player = newPlayer }, Cmd.none )
+
+
+updatePosition : ( Float, Float ) -> Keyboard.KeyCode -> ( Float, Float )
+updatePosition ( x, y ) keyCode =
+    case keyCode of
+        -- w (up)
+        119 ->
+            ( x, y - 10 )
+
+        -- a (left)
+        97 ->
+            ( x - 10, y )
+
+        -- s (down)
+        115 ->
+            ( x, y + 10 )
+
+        -- d (right)
+        100 ->
+            ( x + 10, y )
+
+        _ ->
+            ( x, y )
 
 
 subscriptions : Model -> Sub Message
 subscriptions model =
-    Sub.none
+    Keyboard.presses KeyPress
 
 
 view model =
-    Svg.svg [ width "500", height "500" ] ([ player ] ++ enemies |> List.map drawCircle)
+    Svg.svg [ width "500", height "500" ] ([ model.player ] ++ model.enemies |> List.map drawCircle)
 
 
 player : Circle
