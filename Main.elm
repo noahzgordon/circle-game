@@ -4,6 +4,7 @@ import Svg
 import Svg.Attributes exposing (..)
 import Html.App
 import Keyboard
+import List.Extra as List
 
 
 main =
@@ -36,10 +37,46 @@ update message model =
                 player =
                     model.player
 
+                newPosition =
+
                 newPlayer =
-                    { player | position = updatePosition player.position keyCode }
+                    { player | updatePosition player.position keyCode }
+
+                biggerNewPlayer =
+                    { newPlayer | size = player.size + 20 }
+
+                collidingCircle =
+                    List.find (collidesWith newPlayer) model.enemies
+
             in
-                ( { model | player = newPlayer }, Cmd.none )
+              case collidingCircle of
+                  Just circle ->
+                    if newPlayer.size > circle.size then
+                      ( { model | player = biggerNewPlayer, enemies = List.filter ((/=) circle) model.enemies }, Cmd.none )
+                    else
+                      ( model, Cmd.none )
+                  Nothing ->
+                      ( { model | player = newPlayer }, Cmd.none )
+
+
+collidesWith : Circle -> Circle -> Bool
+collidesWith c1 c2 =
+  let
+    leftBound c = (fst c.position) - (c.size / 2)
+    rightBound c = (fst c.position) + (c.size / 2)
+    bottomBound c = (snd c.position) + (c.size / 2)
+    topBound c = (snd c.position) - (c.size / 2)
+
+    horizontalCollision =
+      (rightBound c1 > leftBound c2 && leftBound c1 < rightBound c2) ||
+        (rightBound c2 > leftBound c1 && leftBound c2 < rightBound c1)
+
+    verticalCollision =
+      (bottomBound c1 > topBound c2 && topBound c1 < bottomBound c2) ||
+        (bottomBound c2 > topBound c1 && topBound c2 < bottomBound c1)
+
+  in
+      horizontalCollision && verticalCollision
 
 
 updatePosition : ( Float, Float ) -> Keyboard.KeyCode -> ( Float, Float )
@@ -83,12 +120,12 @@ enemies : List Circle
 enemies =
     [ { size = 20, color = "red", position = ( 50, 100 ) }
     , { size = 40, color = "red", position = ( 450, 450 ) }
-    , { size = 40, color = "red", position = ( 450, 100 ) }
+    , { size = 60, color = "red", position = ( 450, 100 ) }
     , { size = 60, color = "red", position = ( 400, 250 ) }
-    , { size = 60, color = "red", position = ( 300, 50 ) }
-    , { size = 80, color = "red", position = ( 100, 250 ) }
-    , { size = 90, color = "red", position = ( 100, 250 ) }
-    , { size = 100, color = "red", position = ( 250, 400 ) }
+    , { size = 100, color = "red", position = ( 300, 50 ) }
+    , { size = 120, color = "red", position = ( 100, 250 ) }
+    , { size = 120, color = "red", position = ( 100, 250 ) }
+    , { size = 140, color = "red", position = ( 250, 400 ) }
     ]
 
 
