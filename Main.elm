@@ -2,13 +2,13 @@ module Main exposing (..)
 
 import Svg
 import Svg.Attributes exposing (..)
-import Html.App
+import Html
 import Keyboard
 import List.Extra as List
 
 
 main =
-    Html.App.program
+    Html.program
         { init = initialModel
         , update = update
         , view = view
@@ -45,36 +45,42 @@ update message model =
 
                 collidingCircle =
                     List.find (collidesWith newPlayer) model.enemies
-
             in
-              case collidingCircle of
-                  Just circle ->
-                    if newPlayer.size > circle.size then
-                      ( { model | player = biggerNewPlayer, enemies = List.filter ((/=) circle) model.enemies }, Cmd.none )
-                    else
-                      ( model, Cmd.none )
-                  Nothing ->
-                      ( { model | player = newPlayer }, Cmd.none )
+                case collidingCircle of
+                    Just circle ->
+                        if newPlayer.size > circle.size then
+                            ( { model | player = biggerNewPlayer, enemies = List.filter ((/=) circle) model.enemies }, Cmd.none )
+                        else
+                            ( model, Cmd.none )
+
+                    Nothing ->
+                        ( { model | player = newPlayer }, Cmd.none )
 
 
 collidesWith : Circle -> Circle -> Bool
 collidesWith c1 c2 =
-  let
-    leftBound c = (fst c.position) - (c.size / 2)
-    rightBound c = (fst c.position) + (c.size / 2)
-    bottomBound c = (snd c.position) + (c.size / 2)
-    topBound c = (snd c.position) - (c.size / 2)
+    let
+        leftBound c =
+            (Tuple.first c.position) - (c.size / 2)
 
-    horizontalCollision =
-      (rightBound c1 > leftBound c2 && leftBound c1 < rightBound c2) ||
-        (rightBound c2 > leftBound c1 && leftBound c2 < rightBound c1)
+        rightBound c =
+            (Tuple.first c.position) + (c.size / 2)
 
-    verticalCollision =
-      (bottomBound c1 > topBound c2 && topBound c1 < bottomBound c2) ||
-        (bottomBound c2 > topBound c1 && topBound c2 < bottomBound c1)
+        bottomBound c =
+            (Tuple.second c.position) + (c.size / 2)
 
-  in
-      horizontalCollision && verticalCollision
+        topBound c =
+            (Tuple.second c.position) - (c.size / 2)
+
+        horizontalCollision =
+            (rightBound c1 > leftBound c2 && leftBound c1 < rightBound c2)
+                || (rightBound c2 > leftBound c1 && leftBound c2 < rightBound c1)
+
+        verticalCollision =
+            (bottomBound c1 > topBound c2 && topBound c1 < bottomBound c2)
+                || (bottomBound c2 > topBound c1 && topBound c2 < bottomBound c1)
+    in
+        horizontalCollision && verticalCollision
 
 
 updatePosition : ( Float, Float ) -> Keyboard.KeyCode -> ( Float, Float )
